@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Atreus' Bow (Homework)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ws: { bg: '#020617', frost: '#0ea5e9', blood: '#b91c1c', gold: '#fbbf24' }
+                    },
+                    fontFamily: { base: ['Inter', 'sans-serif'], epic: ['Cinzel', 'serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif;
+            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background-image: radial-gradient(circle at center, rgba(14, 165, 233, 0.1) 0%, transparent 80%);
+        }
+        #mobile-container {
+            width: 100%; max-width: 400px; height: 100vh; max-height: 850px;
+            background-color: #05050a; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(14, 165, 233, 0.2);
+            border: 2px solid #0ea5e9; border-radius: 8px;
+        }
+        @media (max-width: 400px) { #mobile-container { border: none; box-shadow: none; height: 100vh; max-height: none; border-radius: 0; } }
+
+        .btn-option {
+            background: linear-gradient(to right, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.9)); 
+            border: 1px solid #334155; color: #f8fafc; font-family: 'Cinzel', serif; font-weight: 700;
+            text-transform: uppercase; padding: 1.25rem 1rem; border-radius: 4px; width: 100%;
+            text-align: center; transition: all 0.2s; margin-bottom: 0.75rem; letter-spacing: 0.05em;
+        }
+        .btn-option:active { transform: translateY(2px); }
+        .btn-option:hover:not(.disabled) { border-color: #0ea5e9; }
+        .btn-option.correct { background: rgba(14, 165, 233, 0.2); border-color: #0ea5e9; color: #0ea5e9; box-shadow: 0 0 15px rgba(14, 165, 233, 0.3); }
+        .btn-option.wrong { background: rgba(220, 38, 38, 0.2); border-color: #ef4444; color: #ef4444; box-shadow: 0 0 15px rgba(220, 38, 38, 0.3); }
+        .btn-option.disabled { pointer-events: none; opacity: 0.7; }
+
+        .fade-in { animation: fadeIn 0.3s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .praise-toast {
+            position: absolute; top: 15%; left: 50%; transform: translate(-50%, 0);
+            background: #0ea5e9; color: #000; font-family: 'Cinzel', serif; font-weight: bold;
+            padding: 0.5rem 1.5rem; text-transform: uppercase; letter-spacing: 0.1em;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.6); opacity: 0; pointer-events: none; z-index: 101; border-radius: 2px;
+        }
+        .toast-anim { animation: toastUp 1.5s ease-out forwards; }
+        @keyframes toastUp { 0% { transform: translate(-50%, 20px) scale(0.8); opacity: 0; } 20% { transform: translate(-50%, 0) scale(1.1); opacity: 1; } 80% { transform: translate(-50%, 0) scale(1); opacity: 1; } 100% { transform: translate(-50%, -20px) scale(0.8); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div id="mobile-container">
+        <header class="bg-black/90 border-b border-gray-800 p-4 flex justify-between items-center z-10 shrink-0 shadow-lg">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl drop-shadow-[0_0_5px_#0ea5e9]">🏹</span>
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-gray-400 font-base tracking-widest uppercase font-bold">Atreus' Bow</span>
+                    <span class="text-white font-epic text-xs font-bold tracking-widest uppercase">Target Practice</span>
+                </div>
+            </div>
+            <span class="text-ws-frost font-epic font-bold text-[10px] border border-ws-frost px-2 py-0.5 rounded bg-ws-frost/10">B1</span>
+        </header>
+
+        <div id="start-screen" class="flex-1 flex flex-col items-center justify-center p-6 text-center z-10">
+            <img src="https://upload.wikimedia.org/wikipedia/pt/a/a5/God_of_War_Ragnarök_capa.jpg" alt="Ragnarok" class="w-full max-w-[200px] object-cover drop-shadow-[0_0_15px_rgba(14,165,233,0.4)] mb-8 border border-ws-frost rounded">
+            <h1 class="text-3xl font-epic font-bold text-white uppercase tracking-widest mb-2">Winter is Here</h1>
+            <p class="text-gray-400 font-base text-sm mb-10">Shoot the 15 targets using Comparatives & Modal MUST.</p>
+            <button onclick="startQuiz()" class="w-full bg-transparent border-2 border-ws-frost text-ws-frost hover:bg-ws-frost hover:text-black font-epic font-bold text-lg py-4 uppercase tracking-widest transition-colors rounded">Draw Bow</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden flex-1 flex flex-col p-6 z-10 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-2">
+                <span class="font-base text-xs text-gray-500 uppercase tracking-widest font-bold">Arrow <span id="q-num" class="text-ws-frost">1</span>/15</span>
+                <span class="font-base text-xs text-gray-500 uppercase tracking-widest font-bold">Hits: <span id="score-text" class="text-ws-gold">0</span></span>
+            </div>
+            <div id="question-container" class="flex-1 flex flex-col fade-in justify-center mb-8">
+                <p class="text-[10px] text-ws-frost uppercase tracking-widest mb-3 font-bold font-epic text-center">Take Aim</p>
+                <p id="q-text" class="text-2xl font-bold text-white mb-8 leading-relaxed font-base text-center"></p>
+                <div id="options-container" class="flex flex-col gap-3"></div>
+            </div>
+            <button id="next-btn" onclick="nextQuestion()" class="hidden w-full mt-auto bg-black text-white border border-gray-600 font-epic font-bold text-base py-4 uppercase tracking-widest hover:border-white transition-colors rounded">Next Arrow ▸</button>
+        </div>
+
+        <div id="end-screen" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center z-10">
+            <span class="text-7xl mb-6 drop-shadow-[0_0_20px_rgba(14,165,233,0.6)]">🎯</span>
+            <h1 class="text-3xl font-epic font-bold text-white uppercase tracking-widest mb-2 text-ws-frost">Targets Destroyed</h1>
+            <p class="text-gray-400 font-base text-sm font-bold mb-6">Final Accuracy:</p>
+            <div class="text-5xl font-epic font-bold text-white mb-10 border border-ws-frost bg-blue-900/20 p-6 shadow-[0_0_30px_rgba(14,165,233,0.3)] rounded">
+                <span id="final-score">0</span><span class="text-2xl text-gray-500">/15</span>
+            </div>
+            <button onclick="location.reload()" class="w-full bg-black border border-gray-700 text-gray-400 font-epic font-bold text-sm py-4 uppercase tracking-widest hover:text-white transition-colors rounded">Restring Bow</button>
+        </div>
+        <div id="praise-toast" class="praise-toast">BULLSEYE</div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "Thor is ________ than Baldur.", options: ["strong", "stronger"], answer: 1 },
+            { q: "You ________ be better than me.", options: ["must", "should"], answer: 0 },
+            { q: "This axe is ________ than my old sword.", options: ["heavier", "more heavy"], answer: 0 },
+            { q: "The giant wolf is ________ than a bear.", options: ["more dangerous", "dangerouser"], answer: 0 },
+            { q: "We ________ control our anger in battle.", options: ["must", "can"], answer: 0 },
+            { q: "The journey is ________ than we thought.", options: ["longer", "long"], answer: 0 },
+            { q: "Atreus ________ listen to his father.", options: ["must", "might"], answer: 0 },
+            { q: "A God's responsibility is far ________.", options: ["greater", "greatest"], answer: 0 },
+            { q: "Today, you are ________ than yesterday.", options: ["better", "gooder"], answer: 0 },
+            { q: "A disciplined mind is ________ than pure strength.", options: ["important", "more important"], answer: 1 },
+            { q: "A warrior ________ always be ready.", options: ["must", "has"], answer: 0 },
+            { q: "The enemies are getting ________.", options: ["faster", "more fast"], answer: 0 },
+            { q: "We ________ protect our home.", options: ["must", "will"], answer: 0 },
+            { q: "This magic is ________ than the fire.", options: ["colder", "more cold"], answer: 0 },
+            { q: "You are stronger ________ him.", options: ["than", "then"], answer: 0 }
+        ];
+
+        let currentQ = 0; let score = 0;
+        const praises = ["BULLSEYE", "PERFECT AIM", "GODLIKE", "SPARTAN STRIKE"];
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden', 'flex');
+            document.getElementById('quiz-screen').classList.add('flex');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const qData = questions[currentQ];
+            document.getElementById('q-num').innerText = currentQ + 1;
+            document.getElementById('q-text').innerHTML = `"${qData.q}"`;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option'; btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, index);
+                container.appendChild(btn);
+            });
+            document.getElementById('next-btn').classList.add('hidden');
+            const qContainer = document.getElementById('question-container');
+            qContainer.classList.remove('fade-in'); void qContainer.offsetWidth; qContainer.classList.add('fade-in');
+        }
+
+        function checkAnswer(btn, selectedIndex) {
+            const qData = questions[currentQ];
+            document.querySelectorAll('.btn-option').forEach(b => b.classList.add('disabled'));
+            if (selectedIndex === qData.answer) {
+                btn.classList.add('correct'); score++;
+                document.getElementById('score-text').innerText = score; showPraise();
+            } else {
+                btn.classList.add('wrong');
+                document.querySelectorAll('.btn-option')[qData.answer].classList.add('correct'); 
+            }
+            const blankedText = qData.q.replace('________', `<span class="${selectedIndex === qData.answer ? 'text-ws-frost' : 'text-ws-blood'} border-b-2 px-2">${qData.options[qData.answer]}</span>`);
+            document.getElementById('q-text').innerHTML = `"${blankedText}"`;
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() { currentQ++; if (currentQ < questions.length) loadQuestion(); else endQuiz(); }
+        function endQuiz() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('flex');
+            document.getElementById('end-screen').classList.remove('hidden', 'flex');
+            document.getElementById('end-screen').classList.add('flex');
+            document.getElementById('final-score').innerText = score;
+            if(score < 8) document.getElementById('final-score').classList.add('text-ws-blood');
+        }
+        function showPraise() {
+            const toast = document.getElementById('praise-toast');
+            toast.innerText = praises[Math.floor(Math.random() * praises.length)];
+            toast.classList.remove('toast-anim'); void toast.offsetWidth; toast.classList.add('toast-anim');
+        }
+    </script>
+</body>
+</html>
